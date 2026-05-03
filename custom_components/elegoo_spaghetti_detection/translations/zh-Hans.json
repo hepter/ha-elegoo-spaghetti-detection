@@ -1,0 +1,150 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Elegoo Spaghetti Detection",
+        "description": "为 Elegoo 打印机摄像头创建一个检测器。该集成只检测失败并产生实体/事件；暂停、停止和通知动作仍由你的自动化处理。",
+        "data": {
+          "name": "检测器名称",
+          "instance_id": "实体前缀",
+          "home_assistant_host": "Home Assistant 主机",
+          "obico_host": "Obico ML API 主机",
+          "obico_auth_token": "Obico ML API 令牌",
+          "camera": "摄像头",
+          "snapshot_url": "直接快照 URL",
+          "print_status_sensor": "打印状态传感器",
+          "active_print_states": "活动打印状态",
+          "chamber_light": "腔体灯",
+          "light_control_mode": "灯光控制",
+          "light_settle_seconds": "灯光稳定延迟",
+          "run_without_printing": "无打印状态时运行计划检测",
+          "detection_interval": "检测间隔",
+          "sensitivity": "灵敏度",
+          "warning_threshold": "警告阈值",
+          "failure_threshold": "失败阈值",
+          "cooldown_seconds": "检测事件冷却时间"
+        },
+        "data_description": {
+          "home_assistant_host": "ML 服务器可访问的 URL。Docker 在另一台局域网主机上运行时，请使用 HA 的局域网 URL，例如 http://192.168.1.90:8123。",
+          "obico_host": "本项目 ML 服务器的基础 URL，例如 http://192.168.1.100:3333。配置会检查 /hc/ 和 /debug/image。",
+          "obico_auth_token": "必须与 ML 服务器上配置的 ML_API_TOKEN / obico_api_secret 匹配。",
+          "instance_id": "用于实体 ID 的稳定 slug。每个检测器使用不同前缀，例如 elegoo_cc2_left。",
+          "camera": "任意 HA 摄像头实体。elegoo-homeassistant 示例：camera.elegoo_centauri_carbon2_chamber_camera。你的设备名称可能不同。",
+          "snapshot_url": "可选。留空则使用所选摄像头实体的 Home Assistant camera proxy 图像。仅在特殊摄像头场景中使用。",
+          "print_status_sensor": "可选但推荐。示例：sensor.elegoo_centauri_carbon2_print_status。对于 Elegoo 风格命名，匹配的 current_status 传感器会自动作为额外保护。",
+          "active_print_states": "表示正在打印的逗号分隔状态，例如 printing,printing_recovery。Elegoo CC2 通常使用 printing。",
+          "chamber_light": "可选。示例：light.elegoo_centauri_carbon2_chamber_light。仅由灯光控制设置使用。",
+          "light_control_mode": "选择检测时不控制灯光、打开并保持开启，或每次快照后恢复之前的灯光状态。",
+          "light_settle_seconds": "集成打开原本关闭的灯光后，拍摄快照前等待的秒数。默认 3 秒，用于曝光/对焦。",
+          "run_without_printing": "未选择打印状态传感器时，计划检测只会在启用此项后运行。测试按钮始终运行一次检查。",
+          "detection_interval": "打印状态活动时，两次计划检查之间的秒数。示例：600 表示 10 分钟，900 表示 15 分钟。",
+          "warning_threshold": "当灵敏度设置为 Custom thresholds 时使用。",
+          "failure_threshold": "当灵敏度设置为 Custom thresholds 时使用。",
+          "cooldown_seconds": "默认 900 秒。带打印状态传感器的计划检查在每个活动打印窗口只发出一个 detected 事件；result 事件仍会在每次检查时发出。"
+        }
+      }
+    },
+    "error": {
+      "invalid_instance_id": "实体前缀必须至少包含一个有效的 slug 字符。",
+      "instance_id_exists": "此实体前缀已被另一个检测器使用。",
+      "warning_above_failure": "警告阈值必须小于或等于失败阈值。",
+      "already_configured": "此摄像头已配置。",
+      "camera_image_unavailable": "所选摄像头没有提供 entity_picture URL。请尝试其他摄像头或设置直接快照 URL。",
+      "ml_health_failed": "ML 服务器健康检查失败。请确认主机可访问并指向基础 URL，例如 http://192.168.1.100:3333。",
+      "ml_auth_failed": "ML 服务器拒绝了令牌。",
+      "ml_image_fetch_failed": "ML 服务器无法获取或解码摄像头图像。请检查 Home Assistant Host 以及 ML 服务器对摄像头的访问。"
+    },
+    "abort": {
+      "already_configured": "此摄像头已配置。"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "检测器设置",
+        "description": "更新此检测器的摄像头、ML 服务器、打印状态和检测设置。",
+        "data": {
+          "home_assistant_host": "Home Assistant 主机",
+          "obico_host": "Obico ML API 主机",
+          "obico_auth_token": "Obico ML API 令牌",
+          "camera": "摄像头",
+          "snapshot_url": "直接快照 URL",
+          "print_status_sensor": "打印状态传感器",
+          "active_print_states": "活动打印状态",
+          "chamber_light": "腔体灯",
+          "light_control_mode": "灯光控制",
+          "light_settle_seconds": "灯光稳定延迟",
+          "run_without_printing": "无打印状态时运行计划检测",
+          "detection_interval": "检测间隔",
+          "sensitivity": "灵敏度",
+          "warning_threshold": "警告阈值",
+          "failure_threshold": "失败阈值",
+          "cooldown_seconds": "检测事件冷却时间"
+        },
+        "data_description": {
+          "home_assistant_host": "ML 服务器可访问的 URL。Docker 在另一台局域网主机上运行时，请使用 HA 的局域网 URL，例如 http://192.168.1.90:8123。",
+          "obico_host": "本项目 ML 服务器的基础 URL，例如 http://192.168.1.100:3333。配置会检查 /hc/ 和 /debug/image。",
+          "obico_auth_token": "必须与 ML 服务器上配置的 ML_API_TOKEN / obico_api_secret 匹配。",
+          "camera": "任意 HA 摄像头实体。elegoo-homeassistant 示例：camera.elegoo_centauri_carbon2_chamber_camera。你的设备名称可能不同。",
+          "snapshot_url": "可选。留空则使用所选摄像头实体的 Home Assistant camera proxy 图像。",
+          "print_status_sensor": "可选但推荐。示例：sensor.elegoo_centauri_carbon2_print_status。对于 Elegoo 风格命名，匹配的 current_status 传感器会自动作为额外保护。",
+          "active_print_states": "表示正在打印的逗号分隔状态，例如 printing,printing_recovery。",
+          "chamber_light": "可选。示例：light.elegoo_centauri_carbon2_chamber_light。仅由灯光控制设置使用。",
+          "light_control_mode": "选择检测时不控制灯光、打开并保持开启，或每次快照后恢复之前的灯光状态。",
+          "light_settle_seconds": "集成打开原本关闭的灯光后，拍摄快照前等待的秒数。默认 3 秒，用于曝光/对焦。",
+          "run_without_printing": "未选择打印状态传感器时，计划检测只会在启用此项后运行。测试按钮始终运行一次检查。",
+          "detection_interval": "打印状态活动时，两次计划检查之间的秒数。示例：600 表示 10 分钟，900 表示 15 分钟。",
+          "warning_threshold": "当灵敏度设置为 Custom thresholds 时使用。",
+          "failure_threshold": "当灵敏度设置为 Custom thresholds 时使用。",
+          "cooldown_seconds": "默认 900 秒。带打印状态传感器的计划检查在每个活动打印窗口只发出一个 detected 事件；result 事件仍会在每次检查时发出。"
+        }
+      }
+    },
+    "error": {
+      "warning_above_failure": "警告阈值必须小于或等于失败阈值。",
+      "camera_image_unavailable": "所选摄像头没有提供 entity_picture URL。请尝试其他摄像头或设置直接快照 URL。",
+      "ml_health_failed": "ML 服务器健康检查失败。请确认主机可访问并指向基础 URL，例如 http://192.168.1.100:3333。",
+      "ml_auth_failed": "ML 服务器拒绝了令牌。",
+      "ml_image_fetch_failed": "ML 服务器无法获取或解码摄像头图像。请检查 Home Assistant Host 以及 ML 服务器对摄像头的访问。"
+    }
+  },
+  "services": {
+    "predict": {
+      "name": "从 URL 预测 spaghetti",
+      "description": "针对原始图像 URL 运行 Obico ML 模型",
+      "fields": {
+        "obico_host": {
+          "name": "Obico ML API 主机",
+          "description": "Obico ML API 主机"
+        },
+        "obico_auth_token": {
+          "name": "Obico ML API 令牌",
+          "description": "Obico ML API 认证令牌"
+        },
+        "image_url": {
+          "name": "图像 URL",
+          "description": "快照 URL"
+        }
+      }
+    },
+    "run_detection": {
+      "name": "运行检测",
+      "description": "为已配置的检测器运行一次检测检查。",
+      "fields": {
+        "detector": {
+          "name": "检测器"
+        },
+        "config_entry": {
+          "name": "配置项"
+        },
+        "force": {
+          "name": "强制"
+        }
+      }
+    },
+    "reset_state": {
+      "name": "重置检测状态",
+      "description": "清除检测器的置信度、结果和错误状态。"
+    }
+  }
+}

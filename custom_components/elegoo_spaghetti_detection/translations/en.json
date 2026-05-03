@@ -1,0 +1,150 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Elegoo Spaghetti Detection",
+        "description": "Create one detector for an Elegoo printer camera. The integration only detects failures and fires entities/events; pause, stop, and notify actions stay in your own automations.",
+        "data": {
+          "name": "Detector name",
+          "instance_id": "Entity prefix",
+          "home_assistant_host": "Home Assistant Host",
+          "obico_host": "Obico ML API Host",
+          "obico_auth_token": "Obico ML API Auth Token",
+          "camera": "Camera",
+          "snapshot_url": "Direct snapshot URL",
+          "print_status_sensor": "Print status sensor",
+          "active_print_states": "Active print states",
+          "chamber_light": "Chamber light",
+          "light_control_mode": "Light control",
+          "light_settle_seconds": "Light settle delay",
+          "run_without_printing": "Run scheduled detection without print status",
+          "detection_interval": "Detection interval",
+          "sensitivity": "Sensitivity",
+          "warning_threshold": "Warning threshold",
+          "failure_threshold": "Failure threshold",
+          "cooldown_seconds": "Detected event cooldown"
+        },
+        "data_description": {
+          "home_assistant_host": "URL reachable by the ML server. For Docker on another LAN host, use the HA LAN URL, for example http://192.168.1.90:8123.",
+          "obico_host": "Base URL of this project's ML server, for example http://192.168.1.100:3333. The setup checks /hc/ and /debug/image.",
+          "obico_auth_token": "Must match ML_API_TOKEN / obico_api_secret configured on the ML server.",
+          "instance_id": "Stable slug used in entity IDs. Use a different prefix for each detector, for example elegoo_cc2_left.",
+          "camera": "Any HA camera entity. Example from elegoo-homeassistant: camera.elegoo_centauri_carbon2_chamber_camera. Your device name may differ.",
+          "snapshot_url": "Optional. Leave empty to use the selected camera entity's Home Assistant camera proxy image. Use this only for unusual cameras.",
+          "print_status_sensor": "Optional but recommended. Example: sensor.elegoo_centauri_carbon2_print_status. For Elegoo-style names, the matching current_status sensor is used automatically as an extra guard.",
+          "active_print_states": "Comma-separated states that mean printing, for example printing,printing_recovery. Elegoo CC2 usually uses printing.",
+          "chamber_light": "Optional. Example: light.elegoo_centauri_carbon2_chamber_light. Used only by the light-control setting.",
+          "light_control_mode": "Choose whether detection should leave the light alone, turn it on and leave it on, or restore the previous light state after each snapshot.",
+          "light_settle_seconds": "Seconds to wait after this integration turns on an off light before taking the snapshot. Default is 3 seconds for camera exposure/focus.",
+          "run_without_printing": "If no print status sensor is selected, scheduled detection only runs when this is enabled. The Test button always runs one check.",
+          "detection_interval": "Seconds between scheduled checks while the print status is active. Examples: 600 for 10 minutes, 900 for 15 minutes.",
+          "warning_threshold": "Used when Sensitivity is set to Custom thresholds.",
+          "failure_threshold": "Used when Sensitivity is set to Custom thresholds.",
+          "cooldown_seconds": "Default is 900 seconds. Scheduled checks with a print status sensor emit one detected event per active print window; result events still fire for every check."
+        }
+      }
+    },
+    "error": {
+      "invalid_instance_id": "Entity prefix must contain at least one valid slug character.",
+      "instance_id_exists": "This entity prefix is already used by another detector.",
+      "warning_above_failure": "Warning threshold must be lower than or equal to failure threshold.",
+      "already_configured": "This camera is already configured.",
+      "camera_image_unavailable": "The selected camera does not expose an entity_picture URL. Try another camera or set a direct snapshot URL.",
+      "ml_health_failed": "The ML server health check failed. Confirm the host is reachable and points to the base URL, for example http://192.168.1.100:3333.",
+      "ml_auth_failed": "The ML server rejected the token.",
+      "ml_image_fetch_failed": "The ML server could not fetch or decode the camera image. Check Home Assistant Host and camera access from the ML server."
+    },
+    "abort": {
+      "already_configured": "This camera is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Detector settings",
+        "description": "Update camera, ML server, print-state, and detection settings for this detector.",
+        "data": {
+          "home_assistant_host": "Home Assistant Host",
+          "obico_host": "Obico ML API Host",
+          "obico_auth_token": "Obico ML API Auth Token",
+          "camera": "Camera",
+          "snapshot_url": "Direct snapshot URL",
+          "print_status_sensor": "Print status sensor",
+          "active_print_states": "Active print states",
+          "chamber_light": "Chamber light",
+          "light_control_mode": "Light control",
+          "light_settle_seconds": "Light settle delay",
+          "run_without_printing": "Run scheduled detection without print status",
+          "detection_interval": "Detection interval",
+          "sensitivity": "Sensitivity",
+          "warning_threshold": "Warning threshold",
+          "failure_threshold": "Failure threshold",
+          "cooldown_seconds": "Detected event cooldown"
+        },
+        "data_description": {
+          "home_assistant_host": "URL reachable by the ML server. For Docker on another LAN host, use the HA LAN URL, for example http://192.168.1.90:8123.",
+          "obico_host": "Base URL of this project's ML server, for example http://192.168.1.100:3333. The setup checks /hc/ and /debug/image.",
+          "obico_auth_token": "Must match ML_API_TOKEN / obico_api_secret configured on the ML server.",
+          "camera": "Any HA camera entity. Example from elegoo-homeassistant: camera.elegoo_centauri_carbon2_chamber_camera. Your device name may differ.",
+          "snapshot_url": "Optional. Leave empty to use the selected camera entity's Home Assistant camera proxy image.",
+          "print_status_sensor": "Optional but recommended. Example: sensor.elegoo_centauri_carbon2_print_status. For Elegoo-style names, the matching current_status sensor is used automatically as an extra guard.",
+          "active_print_states": "Comma-separated states that mean printing, for example printing,printing_recovery.",
+          "chamber_light": "Optional. Example: light.elegoo_centauri_carbon2_chamber_light. Used only by the light-control setting.",
+          "light_control_mode": "Choose whether detection should leave the light alone, turn it on and leave it on, or restore the previous light state after each snapshot.",
+          "light_settle_seconds": "Seconds to wait after this integration turns on an off light before taking the snapshot. Default is 3 seconds for camera exposure/focus.",
+          "run_without_printing": "If no print status sensor is selected, scheduled detection only runs when this is enabled. The Test button always runs one check.",
+          "detection_interval": "Seconds between scheduled checks while the print status is active. Examples: 600 for 10 minutes, 900 for 15 minutes.",
+          "warning_threshold": "Used when Sensitivity is set to Custom thresholds.",
+          "failure_threshold": "Used when Sensitivity is set to Custom thresholds.",
+          "cooldown_seconds": "Default is 900 seconds. Scheduled checks with a print status sensor emit one detected event per active print window; result events still fire for every check."
+        }
+      }
+    },
+    "error": {
+      "warning_above_failure": "Warning threshold must be lower than or equal to failure threshold.",
+      "camera_image_unavailable": "The selected camera does not expose an entity_picture URL. Try another camera or set a direct snapshot URL.",
+      "ml_health_failed": "The ML server health check failed. Confirm the host is reachable and points to the base URL, for example http://192.168.1.100:3333.",
+      "ml_auth_failed": "The ML server rejected the token.",
+      "ml_image_fetch_failed": "The ML server could not fetch or decode the camera image. Check Home Assistant Host and camera access from the ML server."
+    }
+  },
+  "services": {
+    "predict": {
+      "name": "Predict spaghetti from URL",
+      "description": "Runs the Obico ML model against a raw image URL",
+      "fields": {
+        "obico_host": {
+          "name": "Obico ML API Host",
+          "description": "Obico ML API host"
+        },
+        "obico_auth_token": {
+          "name": "Obico ML API Auth Token",
+          "description": "Obico ML API authentication token"
+        },
+        "image_url": {
+          "name": "Image URL",
+          "description": "Snapshot URL"
+        }
+      }
+    },
+    "run_detection": {
+      "name": "Run detection",
+      "description": "Runs one detection check for a configured detector.",
+      "fields": {
+        "detector": {
+          "name": "Detector"
+        },
+        "config_entry": {
+          "name": "Config entry"
+        },
+        "force": {
+          "name": "Force"
+        }
+      }
+    },
+    "reset_state": {
+      "name": "Reset detection state",
+      "description": "Clears the detector confidence, result, and error state."
+    }
+  }
+}

@@ -1,0 +1,20 @@
+FROM thespaghettidetective/ml_api_base:1.3
+WORKDIR /app
+EXPOSE 3333
+
+RUN mkdir -p model
+COPY rootfs/app/requirements.txt /app/requirements.txt
+COPY rootfs/app/model/model-weights.darknet.url /app/model/model-weights.darknet.url
+COPY rootfs/app/model/model-weights.onnx.url /app/model/model-weights.onnx.url
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
+
+RUN echo 'Downloading the latest failure detection AI model in Darknet format...'
+RUN wget -O model/model-weights.darknet $(cat model/model-weights.darknet.url | tr -d '\r')
+RUN echo 'Downloading the latest failure detection AI model in ONNX format...'
+RUN wget -O model/model-weights.onnx $(cat model/model-weights.onnx.url | tr -d '\r')
+
+ADD rootfs/app /app
+ENV FLASK_APP server.py
+
+CMD gunicorn --bind "0.0.0.0:3333" --workers "${GUNICORN_WORKERS:-1}" --timeout "${GUNICORN_TIMEOUT:-120}" --error-logfile - --log-level info wsgi

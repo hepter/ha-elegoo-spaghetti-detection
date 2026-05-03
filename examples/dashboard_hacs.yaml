@@ -1,0 +1,492 @@
+type: vertical-stack
+cards:
+  - type: custom:button-card
+    entity: sensor.elegoo_spaghetti_detection_status
+    show_name: false
+    show_icon: false
+    show_state: false
+    tap_action:
+      action: more-info
+    custom_fields:
+      content: |
+        [[[
+          const state = (id) => states[id]?.state ?? 'unknown';
+          const numberState = (id) => Number.parseFloat(state(id)) || 0;
+          const formatDate = (value, fallback = 'Not available') => {
+            if (!value || ['unknown', 'unavailable', 'none'].includes(value)) return fallback;
+            const date = new Date(value);
+            return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
+          };
+
+          const status = state('sensor.elegoo_spaghetti_detection_status').trim();
+          const detected = state('binary_sensor.elegoo_spaghetti_detection_spaghetti_detected') === 'on';
+          const confidence = numberState('sensor.elegoo_spaghetti_detection_confidence');
+          const raw = numberState('sensor.elegoo_spaghetti_detection_raw_score');
+          const detections = state('sensor.elegoo_spaghetti_detection_detections');
+          const printStatus = state('sensor.elegoo_centauri_carbon2_print_status');
+          const nextRun = state('sensor.elegoo_spaghetti_detection_next_run');
+          const lastRun = state('sensor.elegoo_spaghetti_detection_last_run');
+          const lastError = state('sensor.elegoo_spaghetti_detection_last_error');
+          const automation = state('automation.elegoo_cc2_spaghetti_pause_and_notify');
+
+          const statusMap = {
+            clear: {
+              label: 'Clear',
+              color: '#34c759',
+              bg: 'rgba(52,199,89,.14)',
+              desc: 'No spaghetti was detected in the last check.'
+            },
+            detected: {
+              label: 'Failure detected',
+              color: '#ff453a',
+              bg: 'rgba(255,69,58,.18)',
+              desc: 'Check the camera before continuing.'
+            },
+            warning: {
+              label: 'Warning',
+              color: '#ff9f0a',
+              bg: 'rgba(255,159,10,.16)',
+              desc: 'The score is above the warning threshold but below failure.'
+            },
+            checking: {
+              label: 'Checking',
+              color: '#0a84ff',
+              bg: 'rgba(10,132,255,.16)',
+              desc: 'The current camera image is being analyzed.'
+            },
+            waiting_for_print: {
+              label: 'Waiting for print',
+              color: '#8e8e93',
+              bg: 'rgba(142,142,147,.14)',
+              desc: 'Waiting for an active print.'
+            },
+            status_unavailable: {
+              label: 'Print status unavailable',
+              color: '#ff9f0a',
+              bg: 'rgba(255,159,10,.14)',
+              desc: 'Check the selected print status entity in integration options.'
+            },
+            busy: {
+              label: 'Busy',
+              color: '#0a84ff',
+              bg: 'rgba(10,132,255,.14)',
+              desc: 'Another detection request is still running.'
+            },
+            error: {
+              label: 'Error',
+              color: '#ff453a',
+              bg: 'rgba(255,69,58,.16)',
+              desc: 'The last run failed. Check the error field below.'
+            },
+            idle: {
+              label: 'Idle',
+              color: '#8e8e93',
+              bg: 'rgba(142,142,147,.14)',
+              desc: 'The detector is idle.'
+            }
+          };
+
+          const view = statusMap[status] || {
+            label: status.replaceAll('_', ' '),
+            color: '#8e8e93',
+            bg: 'rgba(142,142,147,.14)',
+            desc: 'The detector state is currently unknown.'
+          };
+
+          const automationColor = automation === 'on' ? '#34c759' : automation === 'off' ? '#ff9f0a' : '#8e8e93';
+          const automationText = automation === 'on'
+            ? 'Automation enabled'
+            : automation === 'off'
+              ? 'Automation disabled'
+              : 'Automation not found';
+
+          const errorText =
+            lastError && !['none', 'unknown', 'unavailable', ''].includes(lastError)
+              ? lastError
+              : 'None';
+
+          return `
+            <div class="wrap">
+              <div class="header">
+                <div class="status-dot" style="background:${view.color}; box-shadow:0 0 24px ${view.color}66;"></div>
+                <div class="header-main">
+                  <div class="title">Spaghetti Detection</div>
+                  <div class="subtitle">${view.label}</div>
+                </div>
+                <div class="automation-pill" style="border-color:${automationColor}55; background:${automationColor}18; color:${automationColor};">
+                  ${automationText}
+                </div>
+              </div>
+
+              <div class="desc" style="background:${view.bg}; border-color:${view.color}33;">
+                ${view.desc}
+              </div>
+
+              <div class="confidence">
+                <div class="confidence-top">
+                  <span>Confidence</span>
+                  <b>${confidence.toFixed(1)}%</b>
+                </div>
+                <div class="bar">
+                  <div class="bar-fill" style="
+                    width:${Math.max(0, Math.min(100, confidence))}%;
+                    background:${detected ? '#ff453a' : view.color};
+                    box-shadow:0 0 18px ${detected ? '#ff453a' : view.color};
+                  "></div>
+                </div>
+              </div>
+
+              <div class="metrics">
+                <div class="metric">
+                  <div class="metric-label">Print</div>
+                  <div class="metric-value">${printStatus}</div>
+                </div>
+                <div class="metric">
+                  <div class="metric-label">Next check</div>
+                  <div class="metric-value">${formatDate(nextRun, 'Not scheduled')}</div>
+                </div>
+                <div class="metric">
+                  <div class="metric-label">Detections</div>
+                  <div class="metric-value">${detections}</div>
+                </div>
+                <div class="metric">
+                  <div class="metric-label">Raw score</div>
+                  <div class="metric-value">${raw.toFixed(3)}</div>
+                </div>
+              </div>
+
+              <div class="footer">
+                <div><b>Last check:</b> ${formatDate(lastRun, 'Never')}</div>
+                <div><b>Last error:</b> ${errorText}</div>
+              </div>
+            </div>
+          `;
+        ]]]
+    styles:
+      card:
+        - border-radius: 22px
+        - padding: 14px
+        - background: rgba(255,255,255,.04)
+        - border: 1px solid rgba(255,255,255,.08)
+        - box-shadow: none
+        - overflow: hidden
+      grid:
+        - grid-template-areas: "\"content\""
+        - grid-template-columns: 1fr
+        - grid-template-rows: auto
+      custom_fields:
+        content:
+          - width: 100%
+          - justify-self: stretch
+          - text-align: left
+    extra_styles: |
+      .wrap {
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      .header {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .status-dot {
+        width: 18px;
+        height: 18px;
+        border-radius: 999px;
+      }
+
+      .title {
+        font-size: 21px;
+        font-weight: 800;
+        color: rgba(255,255,255,.96);
+        line-height: 1.15;
+      }
+
+      .subtitle {
+        margin-top: 3px;
+        font-size: 14px;
+        opacity: .74;
+        font-weight: 700;
+        text-transform: capitalize;
+      }
+
+      .automation-pill {
+        border: 1px solid;
+        border-radius: 999px;
+        padding: 7px 10px;
+        font-size: 12px;
+        font-weight: 800;
+        white-space: nowrap;
+      }
+
+      .desc {
+        margin-top: 14px;
+        padding: 11px 12px;
+        border: 1px solid;
+        border-radius: 14px;
+        color: rgba(255,255,255,.82);
+        font-size: 13px;
+        line-height: 1.35;
+        white-space: normal;
+        overflow-wrap: anywhere;
+      }
+
+      .confidence {
+        margin-top: 14px;
+      }
+
+      .confidence-top {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 7px;
+        font-size: 13px;
+        opacity: .85;
+      }
+
+      .bar {
+        height: 12px;
+        border-radius: 999px;
+        background: rgba(255,255,255,.11);
+        overflow: hidden;
+      }
+
+      .bar-fill {
+        height: 100%;
+        border-radius: 999px;
+        transition: width .3s ease;
+      }
+
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .metric {
+        border-radius: 14px;
+        padding: 10px;
+        background: rgba(255,255,255,.06);
+        text-align: center;
+        min-width: 0;
+      }
+
+      .metric-label {
+        opacity: .62;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .metric-value {
+        margin-top: 4px;
+        font-size: 14px;
+        font-weight: 800;
+        color: rgba(255,255,255,.96);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .footer {
+        margin-top: 13px;
+        font-size: 12px;
+        opacity: .70;
+        line-height: 1.45;
+      }
+
+      @media (max-width: 520px) {
+        .header {
+          grid-template-columns: auto 1fr;
+        }
+
+        .automation-pill {
+          grid-column: 1 / -1;
+          justify-self: start;
+        }
+
+        .metrics {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+  - type: conditional
+    conditions:
+      - entity: binary_sensor.elegoo_spaghetti_detection_spaghetti_detected
+        state: "on"
+    card:
+      type: custom:mushroom-template-card
+      entity: binary_sensor.elegoo_spaghetti_detection_spaghetti_detected
+      primary: Spaghetti detected
+      secondary: >-
+        Confidence: {{ states('sensor.elegoo_spaghetti_detection_confidence') }}%
+        • Detections: {{ states('sensor.elegoo_spaghetti_detection_detections') }}
+      icon: mdi:alert-octagon
+      icon_color: red
+      badge_icon: mdi:pause
+      badge_color: red
+      layout: horizontal
+      tap_action:
+        action: more-info
+      card_mod:
+        style: |
+          ha-card {
+            border-radius: 18px;
+            background: rgba(255,69,58,.16);
+            border: 1px solid rgba(255,69,58,.34);
+            animation: spaghettiPulse 1.6s ease-in-out infinite;
+          }
+
+          @keyframes spaghettiPulse {
+            0% { box-shadow: 0 0 0 rgba(255,69,58,0); }
+            50% { box-shadow: 0 0 28px rgba(255,69,58,.30); }
+            100% { box-shadow: 0 0 0 rgba(255,69,58,0); }
+          }
+
+  - type: grid
+    columns: 2
+    square: false
+    cards:
+      # Replace this placeholder automation with your own notification/pause
+      # automation entity before using the toggle card below.
+      - type: custom:mushroom-template-card
+        entity: automation.elegoo_cc2_spaghetti_pause_and_notify
+        primary: Auto pause
+        secondary: >-
+          {% if is_state('automation.elegoo_cc2_spaghetti_pause_and_notify', 'on') %}
+            Enabled: pause and notify on failure
+          {% elif is_state('automation.elegoo_cc2_spaghetti_pause_and_notify', 'off') %}
+            Disabled: notification-only or manual review mode
+          {% else %}
+            Replace this entity with your own automation
+          {% endif %}
+        icon: >-
+          {% if is_state('automation.elegoo_cc2_spaghetti_pause_and_notify', 'on') %}
+            mdi:shield-check
+          {% else %}
+            mdi:shield-off
+          {% endif %}
+        icon_color: >-
+          {% if is_state('automation.elegoo_cc2_spaghetti_pause_and_notify', 'on') %}
+            green
+          {% else %}
+            amber
+          {% endif %}
+        layout: vertical
+        tap_action:
+          action: toggle
+        hold_action:
+          action: more-info
+        card_mod:
+          style: |
+            ha-card {
+              border-radius: 18px;
+              background: rgba(255,255,255,.045);
+              border: 1px solid rgba(255,255,255,.08);
+            }
+
+      - type: custom:mushroom-template-card
+        entity: button.elegoo_spaghetti_detection_test_spaghetti_detection
+        primary: Manual test
+        secondary: Take one snapshot and run detection
+        icon: mdi:camera-iris
+        icon_color: blue
+        layout: vertical
+        tap_action:
+          action: perform-action
+          perform_action: button.press
+          target:
+            entity_id: button.elegoo_spaghetti_detection_test_spaghetti_detection
+        card_mod:
+          style: |
+            ha-card {
+              border-radius: 18px;
+              background: rgba(10,132,255,.10);
+              border: 1px solid rgba(10,132,255,.24);
+            }
+
+      - type: custom:mushroom-template-card
+        entity: button.elegoo_spaghetti_detection_reset_detection_state
+        primary: Reset detector
+        secondary: Clear confidence and detected state
+        icon: mdi:restart
+        icon_color: purple
+        layout: vertical
+        tap_action:
+          action: perform-action
+          perform_action: button.press
+          target:
+            entity_id: button.elegoo_spaghetti_detection_reset_detection_state
+        card_mod:
+          style: |
+            ha-card {
+              border-radius: 18px;
+              background: rgba(175,82,222,.10);
+              border: 1px solid rgba(175,82,222,.24);
+            }
+
+      - type: custom:mushroom-template-card
+        entity: sensor.elegoo_spaghetti_detection_last_error
+        primary: Last error
+        secondary: >-
+          {% set e = states('sensor.elegoo_spaghetti_detection_last_error') %}
+          {% if e in ['none', 'unknown', 'unavailable', ''] %}
+            None
+          {% else %}
+            {{ e }}
+          {% endif %}
+        icon: >-
+          {% set e = states('sensor.elegoo_spaghetti_detection_last_error') %}
+          {% if e in ['none', 'unknown', 'unavailable', ''] %}
+            mdi:check-circle
+          {% else %}
+            mdi:alert-circle
+          {% endif %}
+        icon_color: >-
+          {% set e = states('sensor.elegoo_spaghetti_detection_last_error') %}
+          {% if e in ['none', 'unknown', 'unavailable', ''] %}
+            green
+          {% else %}
+            red
+          {% endif %}
+        layout: vertical
+        multiline_secondary: true
+        tap_action:
+          action: more-info
+        card_mod:
+          style: |
+            ha-card {
+              border-radius: 18px;
+              background: rgba(255,255,255,.045);
+              border: 1px solid rgba(255,255,255,.08);
+            }
+
+  - type: entities
+    title: Spaghetti detector details
+    show_header_toggle: false
+    entities:
+      - entity: sensor.elegoo_spaghetti_detection_status
+        name: Status
+      - entity: sensor.elegoo_spaghetti_detection_next_run
+        name: Next scheduled check
+      - entity: binary_sensor.elegoo_spaghetti_detection_spaghetti_detected
+        name: Detected
+      - entity: sensor.elegoo_spaghetti_detection_confidence
+        name: Confidence
+      - entity: sensor.elegoo_spaghetti_detection_raw_score
+        name: Raw score
+      - entity: sensor.elegoo_spaghetti_detection_detections
+        name: Detection count
+      - entity: sensor.elegoo_spaghetti_detection_last_run
+        name: Last check
+      - entity: automation.elegoo_cc2_spaghetti_pause_and_notify
+        name: Auto pause automation
+    card_mod:
+      style: |
+        ha-card {
+          border-radius: 18px;
+          background: rgba(255,255,255,.04);
+          border: 1px solid rgba(255,255,255,.08);
+        }

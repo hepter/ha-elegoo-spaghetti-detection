@@ -1,0 +1,77 @@
+alias: Elegoo Spaghetti - Actionable Notification
+mode: single
+
+triggers:
+  - trigger: event
+    event_type: elegoo_spaghetti_detection_detected
+    event_data:
+      detector: elegoo_spaghetti_detection
+    id: detected
+  - trigger: event
+    event_type: mobile_app_notification_action
+    event_data:
+      action: ELEGOO_SPAGHETTI_PAUSE_PRINT
+    id: pause_action
+  - trigger: event
+    event_type: mobile_app_notification_action
+    event_data:
+      action: ELEGOO_SPAGHETTI_STOP_PRINT
+    id: stop_action
+  - trigger: event
+    event_type: mobile_app_notification_action
+    event_data:
+      action: ELEGOO_SPAGHETTI_RESUME_PRINT
+    id: resume_action
+
+variables:
+  notify_service: notify.mobile_app_your_phone
+  pause_button: button.elegoo_centauri_carbon2_pause_print
+  resume_button: button.elegoo_centauri_carbon2_resume_print
+  stop_button: button.elegoo_centauri_carbon2_stop_print
+
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: detected
+        sequence:
+          - action: "{{ notify_service }}"
+            data:
+              title: "Possible print failure"
+              message: >
+                Confidence:
+                {{ (trigger.event.data.confidence | float(0) * 100) | round(1) }}%.
+                Detections: {{ trigger.event.data.detections }}.
+              data:
+                image: "{{ trigger.event.data.image_url }}"
+                actions:
+                  - action: ELEGOO_SPAGHETTI_PAUSE_PRINT
+                    title: Pause print
+                  - action: ELEGOO_SPAGHETTI_STOP_PRINT
+                    title: Stop print
+                  - action: ELEGOO_SPAGHETTI_RESUME_PRINT
+                    title: Resume print
+
+      - conditions:
+          - condition: trigger
+            id: pause_action
+        sequence:
+          - action: button.press
+            target:
+              entity_id: "{{ pause_button }}"
+
+      - conditions:
+          - condition: trigger
+            id: stop_action
+        sequence:
+          - action: button.press
+            target:
+              entity_id: "{{ stop_button }}"
+
+      - conditions:
+          - condition: trigger
+            id: resume_action
+        sequence:
+          - action: button.press
+            target:
+              entity_id: "{{ resume_button }}"

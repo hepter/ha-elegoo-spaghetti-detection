@@ -1,0 +1,150 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Elegoo Spaghetti Detection",
+        "description": "Elegoo प्रिंटर कैमरा के लिए एक detector बनाता है। यह integration केवल failures detect करता है और entities/events बनाता है; pause, stop और notify actions आपकी अपनी automations में रहते हैं।",
+        "data": {
+          "name": "Detector name",
+          "instance_id": "Entity prefix",
+          "home_assistant_host": "Home Assistant Host",
+          "obico_host": "Obico ML API Host",
+          "obico_auth_token": "Obico ML API Auth Token",
+          "camera": "Camera",
+          "snapshot_url": "Direct snapshot URL",
+          "print_status_sensor": "Print status sensor",
+          "active_print_states": "Active print states",
+          "chamber_light": "Chamber light",
+          "light_control_mode": "Light control",
+          "light_settle_seconds": "Light settle delay",
+          "run_without_printing": "Print status के बिना scheduled detection चलाएं",
+          "detection_interval": "Detection interval",
+          "sensitivity": "Sensitivity",
+          "warning_threshold": "Warning threshold",
+          "failure_threshold": "Failure threshold",
+          "cooldown_seconds": "Detected event cooldown"
+        },
+        "data_description": {
+          "home_assistant_host": "ML server द्वारा reachable URL। किसी दूसरे LAN host पर Docker के लिए HA LAN URL इस्तेमाल करें, जैसे http://192.168.1.90:8123.",
+          "obico_host": "इस project के ML server का base URL, जैसे http://192.168.1.100:3333। Setup /hc/ और /debug/image check करता है।",
+          "obico_auth_token": "ML server पर configured ML_API_TOKEN / obico_api_secret से match करना चाहिए।",
+          "instance_id": "Entity IDs में इस्तेमाल होने वाला stable slug। हर detector के लिए अलग prefix इस्तेमाल करें, जैसे elegoo_cc2_left.",
+          "camera": "कोई भी HA camera entity। elegoo-homeassistant example: camera.elegoo_centauri_carbon2_chamber_camera. आपका device name अलग हो सकता है।",
+          "snapshot_url": "Optional। Selected camera entity की Home Assistant camera proxy image इस्तेमाल करने के लिए खाली छोड़ें। इसे केवल unusual cameras के लिए इस्तेमाल करें।",
+          "print_status_sensor": "Optional लेकिन recommended। Example: sensor.elegoo_centauri_carbon2_print_status. Elegoo-style names में matching current_status sensor अपने आप extra guard के रूप में इस्तेमाल होता है।",
+          "active_print_states": "Printing बताने वाले comma-separated states, जैसे printing,printing_recovery. Elegoo CC2 आम तौर पर printing इस्तेमाल करता है।",
+          "chamber_light": "Optional। Example: light.elegoo_centauri_carbon2_chamber_light. केवल light-control setting द्वारा इस्तेमाल होता है।",
+          "light_control_mode": "चुनें कि detection light को न छुए, उसे on करके on रखे, या हर snapshot के बाद पिछली state restore करे।",
+          "light_settle_seconds": "Integration द्वारा off light को on करने के बाद snapshot से पहले wait करने के seconds। Camera exposure/focus के लिए default 3 seconds है।",
+          "run_without_printing": "अगर print status sensor selected नहीं है, scheduled detection केवल यह enabled होने पर चलता है। Test button हमेशा एक check चलाता है।",
+          "detection_interval": "Print status active होने पर scheduled checks के बीच seconds। Examples: 10 minutes के लिए 600, 15 minutes के लिए 900.",
+          "warning_threshold": "Sensitivity Custom thresholds होने पर इस्तेमाल होता है।",
+          "failure_threshold": "Sensitivity Custom thresholds होने पर इस्तेमाल होता है।",
+          "cooldown_seconds": "Default 900 seconds है। Print status sensor के साथ scheduled checks हर active print window में एक detected event emit करते हैं; result events हर check पर आते रहते हैं।"
+        }
+      }
+    },
+    "error": {
+      "invalid_instance_id": "Entity prefix में कम से कम एक valid slug character होना चाहिए।",
+      "instance_id_exists": "यह entity prefix पहले से किसी दूसरे detector द्वारा इस्तेमाल हो रहा है।",
+      "warning_above_failure": "Warning threshold failure threshold से कम या उसके बराबर होना चाहिए।",
+      "already_configured": "यह camera पहले से configured है।",
+      "camera_image_unavailable": "Selected camera entity_picture URL expose नहीं करता। दूसरा camera try करें या direct snapshot URL set करें।",
+      "ml_health_failed": "ML server health check failed। Confirm करें कि host reachable है और base URL पर point करता है, जैसे http://192.168.1.100:3333.",
+      "ml_auth_failed": "ML server ने token reject किया।",
+      "ml_image_fetch_failed": "ML server camera image fetch या decode नहीं कर सका। Home Assistant Host और ML server से camera access check करें।"
+    },
+    "abort": {
+      "already_configured": "यह camera पहले से configured है।"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Detector settings",
+        "description": "इस detector के लिए camera, ML server, print-state और detection settings update करें।",
+        "data": {
+          "home_assistant_host": "Home Assistant Host",
+          "obico_host": "Obico ML API Host",
+          "obico_auth_token": "Obico ML API Auth Token",
+          "camera": "Camera",
+          "snapshot_url": "Direct snapshot URL",
+          "print_status_sensor": "Print status sensor",
+          "active_print_states": "Active print states",
+          "chamber_light": "Chamber light",
+          "light_control_mode": "Light control",
+          "light_settle_seconds": "Light settle delay",
+          "run_without_printing": "Print status के बिना scheduled detection चलाएं",
+          "detection_interval": "Detection interval",
+          "sensitivity": "Sensitivity",
+          "warning_threshold": "Warning threshold",
+          "failure_threshold": "Failure threshold",
+          "cooldown_seconds": "Detected event cooldown"
+        },
+        "data_description": {
+          "home_assistant_host": "ML server द्वारा reachable URL। किसी दूसरे LAN host पर Docker के लिए HA LAN URL इस्तेमाल करें, जैसे http://192.168.1.90:8123.",
+          "obico_host": "इस project के ML server का base URL, जैसे http://192.168.1.100:3333। Setup /hc/ और /debug/image check करता है।",
+          "obico_auth_token": "ML server पर configured ML_API_TOKEN / obico_api_secret से match करना चाहिए।",
+          "camera": "कोई भी HA camera entity। elegoo-homeassistant example: camera.elegoo_centauri_carbon2_chamber_camera. आपका device name अलग हो सकता है।",
+          "snapshot_url": "Optional। Selected camera entity की Home Assistant camera proxy image इस्तेमाल करने के लिए खाली छोड़ें।",
+          "print_status_sensor": "Optional लेकिन recommended। Example: sensor.elegoo_centauri_carbon2_print_status. Elegoo-style names में matching current_status sensor अपने आप extra guard के रूप में इस्तेमाल होता है।",
+          "active_print_states": "Printing बताने वाले comma-separated states, जैसे printing,printing_recovery.",
+          "chamber_light": "Optional। Example: light.elegoo_centauri_carbon2_chamber_light. केवल light-control setting द्वारा इस्तेमाल होता है।",
+          "light_control_mode": "चुनें कि detection light को न छुए, उसे on करके on रखे, या हर snapshot के बाद पिछली state restore करे।",
+          "light_settle_seconds": "Integration द्वारा off light को on करने के बाद snapshot से पहले wait करने के seconds। Camera exposure/focus के लिए default 3 seconds है।",
+          "run_without_printing": "अगर print status sensor selected नहीं है, scheduled detection केवल यह enabled होने पर चलता है। Test button हमेशा एक check चलाता है।",
+          "detection_interval": "Print status active होने पर scheduled checks के बीच seconds। Examples: 10 minutes के लिए 600, 15 minutes के लिए 900.",
+          "warning_threshold": "Sensitivity Custom thresholds होने पर इस्तेमाल होता है।",
+          "failure_threshold": "Sensitivity Custom thresholds होने पर इस्तेमाल होता है।",
+          "cooldown_seconds": "Default 900 seconds है। Print status sensor के साथ scheduled checks हर active print window में एक detected event emit करते हैं; result events हर check पर आते रहते हैं।"
+        }
+      }
+    },
+    "error": {
+      "warning_above_failure": "Warning threshold failure threshold से कम या उसके बराबर होना चाहिए।",
+      "camera_image_unavailable": "Selected camera entity_picture URL expose नहीं करता। दूसरा camera try करें या direct snapshot URL set करें।",
+      "ml_health_failed": "ML server health check failed। Confirm करें कि host reachable है और base URL पर point करता है, जैसे http://192.168.1.100:3333.",
+      "ml_auth_failed": "ML server ने token reject किया।",
+      "ml_image_fetch_failed": "ML server camera image fetch या decode नहीं कर सका। Home Assistant Host और ML server से camera access check करें।"
+    }
+  },
+  "services": {
+    "predict": {
+      "name": "URL से spaghetti predict करें",
+      "description": "Raw image URL पर Obico ML model चलाता है",
+      "fields": {
+        "obico_host": {
+          "name": "Obico ML API Host",
+          "description": "Obico ML API host"
+        },
+        "obico_auth_token": {
+          "name": "Obico ML API Auth Token",
+          "description": "Obico ML API authentication token"
+        },
+        "image_url": {
+          "name": "Image URL",
+          "description": "Snapshot URL"
+        }
+      }
+    },
+    "run_detection": {
+      "name": "Detection चलाएं",
+      "description": "Configured detector के लिए एक detection check चलाता है।",
+      "fields": {
+        "detector": {
+          "name": "Detector"
+        },
+        "config_entry": {
+          "name": "Config entry"
+        },
+        "force": {
+          "name": "Force"
+        }
+      }
+    },
+    "reset_state": {
+      "name": "Detection state reset करें",
+      "description": "Detector confidence, result और error state साफ करता है।"
+    }
+  }
+}

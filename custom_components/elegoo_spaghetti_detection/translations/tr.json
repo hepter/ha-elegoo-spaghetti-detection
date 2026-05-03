@@ -1,0 +1,150 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Elegoo Spaghetti Detection",
+        "description": "Elegoo yazici kamerasi icin bir algilayici olusturur. Entegrasyon yalnizca hatalari algilar ve entity/event uretir; pause, stop ve bildirim aksiyonlari kendi otomasyonlarinizda kalir.",
+        "data": {
+          "name": "Algilayici adi",
+          "instance_id": "Entity on eki",
+          "home_assistant_host": "Home Assistant Host",
+          "obico_host": "Obico ML API Host",
+          "obico_auth_token": "Obico ML API Auth Token",
+          "camera": "Kamera",
+          "snapshot_url": "Dogrudan snapshot URL",
+          "print_status_sensor": "Baski durum sensoru",
+          "active_print_states": "Aktif baski durumlari",
+          "chamber_light": "Kabin isigi",
+          "light_control_mode": "Isik kontrolu",
+          "light_settle_seconds": "Isik bekleme suresi",
+          "run_without_printing": "Baski durumu olmadan zamanlanmis algilama calistir",
+          "detection_interval": "Algilama araligi",
+          "sensitivity": "Hassasiyet",
+          "warning_threshold": "Uyari esigi",
+          "failure_threshold": "Hata esigi",
+          "cooldown_seconds": "Algilandi eventi bekleme suresi"
+        },
+        "data_description": {
+          "home_assistant_host": "ML sunucusunun erisebildigi URL. Baska bir LAN makinesindeki Docker icin HA LAN URL kullanin; ornegin http://192.168.1.90:8123.",
+          "obico_host": "Bu projenin ML sunucusu base URL adresi; ornegin http://192.168.1.100:3333. Kurulum /hc/ ve /debug/image kontrollerini yapar.",
+          "obico_auth_token": "ML sunucusunda ayarlanan ML_API_TOKEN / obico_api_secret ile ayni olmalidir.",
+          "instance_id": "Entity ID'lerinde kullanilan kalici slug. Her algilayici icin farkli bir on ek kullanin; ornegin elegoo_cc2_left.",
+          "camera": "Herhangi bir HA kamera entity'si. elegoo-homeassistant ornegi: camera.elegoo_centauri_carbon2_chamber_camera. Cihaz adiniz farkli olabilir.",
+          "snapshot_url": "Istege bagli. Secilen kamera entity'sinin Home Assistant camera proxy gorselini kullanmak icin bos birakin. Bunu yalnizca ozel kamera durumlarinda kullanin.",
+          "print_status_sensor": "Istege bagli ama onerilir. Ornek: sensor.elegoo_centauri_carbon2_print_status. Elegoo tarzi adlarda eslesen current_status sensoru otomatik ek koruma olarak kullanilir.",
+          "active_print_states": "Baski anlamina gelen virgulle ayrilmis durumlar; ornegin printing,printing_recovery. Elegoo CC2 genelde printing kullanir.",
+          "chamber_light": "Istege bagli. Ornek: light.elegoo_centauri_carbon2_chamber_light. Yalnizca isik kontrol ayari tarafindan kullanilir.",
+          "light_control_mode": "Algilama isigi hic kontrol etmesin mi, acip acik mi biraksin, yoksa her snapshot sonrasinda onceki duruma mi dondursun secin.",
+          "light_settle_seconds": "Bu entegrasyon kapali isigi actiktan sonra snapshot almadan once bekleyecegi saniye. Kamera pozlama/netleme icin varsayilan 3 saniyedir.",
+          "run_without_printing": "Baski durum sensoru secilmediyse zamanlanmis algilama yalnizca bu ayar acikken calisir. Test butonu her zaman tek kontrol calistirir.",
+          "detection_interval": "Baski durumu aktifken zamanlanmis kontroller arasindaki saniye. Ornek: 10 dakika icin 600, 15 dakika icin 900.",
+          "warning_threshold": "Hassasiyet Custom thresholds oldugunda kullanilir.",
+          "failure_threshold": "Hassasiyet Custom thresholds oldugunda kullanilir.",
+          "cooldown_seconds": "Varsayilan 900 saniyedir. Baski durum sensoru olan zamanlanmis kontroller aktif baski penceresi basina bir detected event uretir; result event'leri her kontrolde gelmeye devam eder."
+        }
+      }
+    },
+    "error": {
+      "invalid_instance_id": "Entity on eki en az bir gecerli slug karakteri icermelidir.",
+      "instance_id_exists": "Bu entity on eki baska bir algilayici tarafindan kullaniliyor.",
+      "warning_above_failure": "Uyari esigi hata esiginden kucuk veya ona esit olmalidir.",
+      "already_configured": "Bu kamera zaten yapilandirilmis.",
+      "camera_image_unavailable": "Secilen kamera entity_picture URL sunmuyor. Baska kamera deneyin veya dogrudan snapshot URL ayarlayin.",
+      "ml_health_failed": "ML sunucusu saglik kontrolu basarisiz oldu. Host erisilebilir olmali ve base URL'ye isaret etmelidir; ornegin http://192.168.1.100:3333.",
+      "ml_auth_failed": "ML sunucusu token'i reddetti.",
+      "ml_image_fetch_failed": "ML sunucusu kamera gorselini alamadi veya decode edemedi. Home Assistant Host ve kamera erisimini ML sunucusundan kontrol edin."
+    },
+    "abort": {
+      "already_configured": "Bu kamera zaten yapilandirilmis."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Algilayici ayarlari",
+        "description": "Bu algilayici icin kamera, ML sunucusu, baski durumu ve algilama ayarlarini guncelleyin.",
+        "data": {
+          "home_assistant_host": "Home Assistant Host",
+          "obico_host": "Obico ML API Host",
+          "obico_auth_token": "Obico ML API Auth Token",
+          "camera": "Kamera",
+          "snapshot_url": "Dogrudan snapshot URL",
+          "print_status_sensor": "Baski durum sensoru",
+          "active_print_states": "Aktif baski durumlari",
+          "chamber_light": "Kabin isigi",
+          "light_control_mode": "Isik kontrolu",
+          "light_settle_seconds": "Isik bekleme suresi",
+          "run_without_printing": "Baski durumu olmadan zamanlanmis algilama calistir",
+          "detection_interval": "Algilama araligi",
+          "sensitivity": "Hassasiyet",
+          "warning_threshold": "Uyari esigi",
+          "failure_threshold": "Hata esigi",
+          "cooldown_seconds": "Algilandi eventi bekleme suresi"
+        },
+        "data_description": {
+          "home_assistant_host": "ML sunucusunun erisebildigi URL. Baska bir LAN makinesindeki Docker icin HA LAN URL kullanin; ornegin http://192.168.1.90:8123.",
+          "obico_host": "Bu projenin ML sunucusu base URL adresi; ornegin http://192.168.1.100:3333. Kurulum /hc/ ve /debug/image kontrollerini yapar.",
+          "obico_auth_token": "ML sunucusunda ayarlanan ML_API_TOKEN / obico_api_secret ile ayni olmalidir.",
+          "camera": "Herhangi bir HA kamera entity'si. elegoo-homeassistant ornegi: camera.elegoo_centauri_carbon2_chamber_camera. Cihaz adiniz farkli olabilir.",
+          "snapshot_url": "Istege bagli. Secilen kamera entity'sinin Home Assistant camera proxy gorselini kullanmak icin bos birakin.",
+          "print_status_sensor": "Istege bagli ama onerilir. Ornek: sensor.elegoo_centauri_carbon2_print_status. Elegoo tarzi adlarda eslesen current_status sensoru otomatik ek koruma olarak kullanilir.",
+          "active_print_states": "Baski anlamina gelen virgulle ayrilmis durumlar; ornegin printing,printing_recovery.",
+          "chamber_light": "Istege bagli. Ornek: light.elegoo_centauri_carbon2_chamber_light. Yalnizca isik kontrol ayari tarafindan kullanilir.",
+          "light_control_mode": "Algilama isigi hic kontrol etmesin mi, acip acik mi biraksin, yoksa her snapshot sonrasinda onceki duruma mi dondursun secin.",
+          "light_settle_seconds": "Bu entegrasyon kapali isigi actiktan sonra snapshot almadan once bekleyecegi saniye. Kamera pozlama/netleme icin varsayilan 3 saniyedir.",
+          "run_without_printing": "Baski durum sensoru secilmediyse zamanlanmis algilama yalnizca bu ayar acikken calisir. Test butonu her zaman tek kontrol calistirir.",
+          "detection_interval": "Baski durumu aktifken zamanlanmis kontroller arasindaki saniye. Ornek: 10 dakika icin 600, 15 dakika icin 900.",
+          "warning_threshold": "Hassasiyet Custom thresholds oldugunda kullanilir.",
+          "failure_threshold": "Hassasiyet Custom thresholds oldugunda kullanilir.",
+          "cooldown_seconds": "Varsayilan 900 saniyedir. Baski durum sensoru olan zamanlanmis kontroller aktif baski penceresi basina bir detected event uretir; result event'leri her kontrolde gelmeye devam eder."
+        }
+      }
+    },
+    "error": {
+      "warning_above_failure": "Uyari esigi hata esiginden kucuk veya ona esit olmalidir.",
+      "camera_image_unavailable": "Secilen kamera entity_picture URL sunmuyor. Baska kamera deneyin veya dogrudan snapshot URL ayarlayin.",
+      "ml_health_failed": "ML sunucusu saglik kontrolu basarisiz oldu. Host erisilebilir olmali ve base URL'ye isaret etmelidir; ornegin http://192.168.1.100:3333.",
+      "ml_auth_failed": "ML sunucusu token'i reddetti.",
+      "ml_image_fetch_failed": "ML sunucusu kamera gorselini alamadi veya decode edemedi. Home Assistant Host ve kamera erisimini ML sunucusundan kontrol edin."
+    }
+  },
+  "services": {
+    "predict": {
+      "name": "URL'den spaghetti tahmini",
+      "description": "Obico ML modelini ham bir gorsel URL'si uzerinde calistirir",
+      "fields": {
+        "obico_host": {
+          "name": "Obico ML API Host",
+          "description": "Obico ML API host"
+        },
+        "obico_auth_token": {
+          "name": "Obico ML API Auth Token",
+          "description": "Obico ML API kimlik dogrulama token'i"
+        },
+        "image_url": {
+          "name": "Gorsel URL",
+          "description": "Snapshot URL"
+        }
+      }
+    },
+    "run_detection": {
+      "name": "Algilama calistir",
+      "description": "Yapilandirilmis bir algilayici icin tek algilama kontrolu calistirir.",
+      "fields": {
+        "detector": {
+          "name": "Algilayici"
+        },
+        "config_entry": {
+          "name": "Config entry"
+        },
+        "force": {
+          "name": "Zorla"
+        }
+      }
+    },
+    "reset_state": {
+      "name": "Algilama durumunu sifirla",
+      "description": "Algilayici confidence, sonuc ve hata durumunu temizler."
+    }
+  }
+}

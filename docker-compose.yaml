@@ -1,0 +1,18 @@
+---
+services:
+  ha_elegoo_spaghetti_detection:
+    build:
+      context: ./addon
+      dockerfile: Dockerfile.standalone.base
+    image: hepter/ha_elegoo_spaghetti_detection_standalone:latest
+    container_name: ha_elegoo_spaghetti_detection
+    restart: unless-stopped
+    ports:
+      - 3333:3333/tcp
+    environment:
+      - ML_API_TOKEN=obico_api_secret
+      - ML_USE_GPU=false
+      - ML_MODEL_BACKEND=onnx
+      - GUNICORN_TIMEOUT=120
+      - GUNICORN_WORKERS=1
+      - TZ=Europe/Istanbul

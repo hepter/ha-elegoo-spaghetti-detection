@@ -1,0 +1,116 @@
+type: vertical-stack
+cards:
+  - type: picture-entity
+    entity: camera.elegoo_centauri_carbon2_chamber_camera
+    name: Printer camera
+    camera_view: live
+    show_state: false
+
+  - type: markdown
+    title: Spaghetti Detection
+    content: |
+      {% set status = states('sensor.elegoo_spaghetti_detection_status') %}
+      {% set confidence = states('sensor.elegoo_spaghetti_detection_confidence') | float(0) %}
+      {% set detections = states('sensor.elegoo_spaghetti_detection_detections') %}
+      {% set print_status = states('sensor.elegoo_centauri_carbon2_print_status') %}
+      {% set next_run = states('sensor.elegoo_spaghetti_detection_next_run') %}
+      {% set last_run = states('sensor.elegoo_spaghetti_detection_last_run') %}
+      {% set last_error = states('sensor.elegoo_spaghetti_detection_last_error') %}
+
+      {% if status == 'detected' %}
+      ## Failure detected
+      The detector is above the failure threshold.
+      {% elif status == 'warning' %}
+      ## Warning
+      The detector is above the warning threshold.
+      {% elif status == 'checking' %}
+      ## Checking camera image
+      The current image is being analyzed by the ML server.
+      {% elif status == 'waiting_for_print' %}
+      ## Waiting for print
+      Scheduled checks are paused because the selected print status is not active.
+      {% elif status == 'status_unavailable' %}
+      ## Print status unavailable
+      The selected print status entity is missing, unknown, or unavailable.
+      {% elif status == 'clear' %}
+      ## Clear
+      No spaghetti was detected in the last check.
+      {% else %}
+      ## {{ status | replace('_', ' ') | title }}
+      The detector state is currently {{ status }}.
+      {% endif %}
+
+      **Confidence:** {{ confidence | round(1) }}%  
+      **Detections:** {{ detections }}  
+      **Print status:** {{ print_status }}  
+      **Next scheduled check:** {% if next_run in ['unknown', 'unavailable', 'none', ''] %}Not scheduled yet{% else %}{{ as_timestamp(next_run) | timestamp_custom('%Y-%m-%d %H:%M:%S', true) }}{% endif %}  
+      **Last check:** {% if last_run in ['unknown', 'unavailable', 'none', ''] %}Never{% else %}{{ as_timestamp(last_run) | timestamp_custom('%Y-%m-%d %H:%M:%S', true) }}{% endif %}  
+      **Last error:** {% if last_error in ['none', 'unknown', 'unavailable', ''] %}None{% else %}{{ last_error }}{% endif %}
+
+  - type: gauge
+    entity: sensor.elegoo_spaghetti_detection_confidence
+    name: Confidence
+    min: 0
+    max: 100
+    needle: true
+    severity:
+      green: 0
+      yellow: 30
+      red: 50
+
+  - type: conditional
+    conditions:
+      - entity: binary_sensor.elegoo_spaghetti_detection_spaghetti_detected
+        state: "on"
+    card:
+      type: markdown
+      title: Action needed
+      content: |
+        Spaghetti was detected.
+
+        Check the printer camera before resuming or stopping the print.
+
+  - type: grid
+    columns: 2
+    square: false
+    cards:
+      - type: button
+        entity: button.elegoo_spaghetti_detection_test_spaghetti_detection
+        name: Test detection
+        icon: mdi:camera-iris
+        tap_action:
+          action: perform-action
+          perform_action: button.press
+          target:
+            entity_id: button.elegoo_spaghetti_detection_test_spaghetti_detection
+
+      - type: button
+        entity: button.elegoo_spaghetti_detection_reset_detection_state
+        name: Reset detector
+        icon: mdi:restart
+        tap_action:
+          action: perform-action
+          perform_action: button.press
+          target:
+            entity_id: button.elegoo_spaghetti_detection_reset_detection_state
+
+  - type: entities
+    title: Detector details
+    show_header_toggle: false
+    entities:
+      - entity: sensor.elegoo_spaghetti_detection_status
+        name: Detector status
+      - entity: sensor.elegoo_spaghetti_detection_next_run
+        name: Next scheduled check
+      - entity: sensor.elegoo_spaghetti_detection_last_run
+        name: Last check
+      - entity: binary_sensor.elegoo_spaghetti_detection_spaghetti_detected
+        name: Spaghetti detected
+      - entity: sensor.elegoo_spaghetti_detection_confidence
+        name: Confidence
+      - entity: sensor.elegoo_spaghetti_detection_raw_score
+        name: Raw score
+      - entity: sensor.elegoo_spaghetti_detection_detections
+        name: Detection count
+      - entity: sensor.elegoo_spaghetti_detection_last_error
+        name: Last error

@@ -1,0 +1,60 @@
+predict:
+  name: "Predict spaghetti from URL"
+  description: "Runs the Obico ML model against a raw image URL. This is mainly for debugging."
+  fields:
+    obico_host:
+      description: "Obico ML Server URL."
+      example: "http://192.168.1.123:3333"
+      required: true
+      selector:
+        text:
+    obico_auth_token:
+      description: "Obico ML Server authentication token."
+      example: "obico_api_secret"
+      required: true
+      selector:
+        text:
+    image_url:
+      description: "Snapshot URL to check."
+      example: "https://home.example.com/api/camera_proxy/camera.example?token=..."
+      required: true
+      selector:
+        text:
+
+run_detection:
+  name: "Run detection"
+  description: "Runs one detection check for a configured detector. With force enabled this works even when the printer is not printing."
+  fields:
+    detector:
+      description: "Detector/entity prefix, for example elegoo_spaghetti_detection."
+      required: false
+      selector:
+        text:
+    config_entry:
+      description: "Detector config entry."
+      required: false
+      selector:
+        config_entry:
+          integration: elegoo_spaghetti_detection
+    force:
+      description: "Run as a manual test and bypass the print-status gate."
+      required: false
+      default: true
+      selector:
+        boolean:
+
+reset_state:
+  name: "Reset detection state"
+  description: "Clears the current detector confidence, result, and error state."
+  fields:
+    detector:
+      description: "Detector/entity prefix."
+      required: false
+      selector:
+        text:
+    config_entry:
+      description: "Detector config entry."
+      required: false
+      selector:
+        config_entry:
+          integration: elegoo_spaghetti_detection

@@ -1,0 +1,18 @@
+name: "Elegoo Spaghetti Detection Server"
+description: "Obico ML server for Elegoo spaghetti detection"
+version: "1.0.0"
+slug: "ha_elegoo_spaghetti_detection_addon"
+init: false
+arch:
+  - amd64
+startup: services
+ports:
+  3333/tcp: 3333
+options:
+  obico_api_secret: "obico_api_secret"
+  use_gpu: false
+  gunicorn_timeout: 120
+schema:
+  obico_api_secret: str
+  use_gpu: bool
+  gunicorn_timeout: int

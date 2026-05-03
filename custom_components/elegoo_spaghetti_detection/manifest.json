@@ -1,0 +1,16 @@
+{
+  "domain": "elegoo_spaghetti_detection",
+  "name": "Elegoo Spaghetti Detection",
+  "codeowners": [
+    "@hepter"
+  ],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/hepter/ha-elegoo-spaghetti-detection",
+  "integration_type": "hub",
+  "iot_class": "calculated",
+  "issue_tracker": "https://github.com/hepter/ha-elegoo-spaghetti-detection/issues",
+  "requirements": [],
+  "version": "1.0.0"
+}
+

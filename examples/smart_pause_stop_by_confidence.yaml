@@ -1,0 +1,50 @@
+alias: Elegoo Spaghetti - Smart Pause Stop
+mode: single
+
+triggers:
+  - trigger: event
+    event_type: elegoo_spaghetti_detection_detected
+    event_data:
+      detector: elegoo_spaghetti_detection
+
+variables:
+  notify_service: notify.mobile_app_your_phone
+  pause_button: button.elegoo_centauri_carbon2_pause_print
+  stop_button: button.elegoo_centauri_carbon2_stop_print
+  confidence: "{{ trigger.event.data.confidence | float(0) }}"
+  confidence_percent: "{{ (confidence | float(0) * 100) | round(1) }}"
+  detections: "{{ trigger.event.data.detections | int(0) }}"
+
+actions:
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ confidence >= 0.85 }}"
+        sequence:
+          - action: "{{ notify_service }}"
+            data:
+              title: "High confidence print failure"
+              message: >
+                Confidence {{ confidence_percent }}%, detections {{ detections }}.
+                Stopping the print.
+              data:
+                image: "{{ trigger.event.data.image_url }}"
+          - action: button.press
+            target:
+              entity_id: "{{ stop_button }}"
+
+      - conditions:
+          - condition: template
+            value_template: "{{ confidence < 0.85 }}"
+        sequence:
+          - action: "{{ notify_service }}"
+            data:
+              title: "Print paused for review"
+              message: >
+                Confidence {{ confidence_percent }}%, detections {{ detections }}.
+                Pausing the print for manual review.
+              data:
+                image: "{{ trigger.event.data.image_url }}"
+          - action: button.press
+            target:
+              entity_id: "{{ pause_button }}"

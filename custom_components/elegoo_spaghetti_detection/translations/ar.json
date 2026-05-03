@@ -1,0 +1,150 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Elegoo Spaghetti Detection",
+        "description": "ينشئ كاشفا لكاميرا طابعة Elegoo. هذا التكامل يكتشف الاخطاء فقط وينشئ entities/events؛ تبقى اجراءات pause و stop والتنبيهات داخل automations الخاصة بك.",
+        "data": {
+          "name": "اسم الكاشف",
+          "instance_id": "بادئة entity",
+          "home_assistant_host": "Home Assistant Host",
+          "obico_host": "Obico ML API Host",
+          "obico_auth_token": "Obico ML API Auth Token",
+          "camera": "الكاميرا",
+          "snapshot_url": "رابط snapshot مباشر",
+          "print_status_sensor": "حساس حالة الطباعة",
+          "active_print_states": "حالات الطباعة النشطة",
+          "chamber_light": "ضوء الحجرة",
+          "light_control_mode": "التحكم بالضوء",
+          "light_settle_seconds": "تأخير استقرار الضوء",
+          "run_without_printing": "تشغيل الكشف المجدول بدون حالة طباعة",
+          "detection_interval": "فاصل الكشف",
+          "sensitivity": "الحساسية",
+          "warning_threshold": "حد التحذير",
+          "failure_threshold": "حد الفشل",
+          "cooldown_seconds": "فترة تهدئة حدث detected"
+        },
+        "data_description": {
+          "home_assistant_host": "URL يمكن لخادم ML الوصول اليه. عند تشغيل Docker على مضيف LAN اخر، استخدم HA LAN URL مثل http://192.168.1.90:8123.",
+          "obico_host": "Base URL لخادم ML الخاص بهذا المشروع، مثل http://192.168.1.100:3333. يقوم الاعداد بفحص /hc/ و /debug/image.",
+          "obico_auth_token": "يجب ان يطابق ML_API_TOKEN / obico_api_secret المكون على خادم ML.",
+          "instance_id": "Slug ثابت يستخدم في entity IDs. استخدم بادئة مختلفة لكل كاشف، مثل elegoo_cc2_left.",
+          "camera": "اي HA camera entity. مثال من elegoo-homeassistant: camera.elegoo_centauri_carbon2_chamber_camera. قد يختلف اسم جهازك.",
+          "snapshot_url": "اختياري. اتركه فارغا لاستخدام صورة Home Assistant camera proxy للكاميرا المحددة. استخدمه فقط للكاميرات غير المعتادة.",
+          "print_status_sensor": "اختياري لكن موصى به. مثال: sensor.elegoo_centauri_carbon2_print_status. للاسماء بأسلوب Elegoo، يتم استخدام حساس current_status المطابق تلقائيا كحارس اضافي.",
+          "active_print_states": "حالات مفصولة بفواصل تعني الطباعة، مثل printing,printing_recovery. تستخدم Elegoo CC2 عادة printing.",
+          "chamber_light": "اختياري. مثال: light.elegoo_centauri_carbon2_chamber_light. يستخدم فقط بواسطة اعداد التحكم بالضوء.",
+          "light_control_mode": "اختر ما اذا كان الكشف لا يتحكم بالضوء، او يشغله ويبقيه مشغلا، او يعيد حالة الضوء السابقة بعد كل snapshot.",
+          "light_settle_seconds": "عدد الثواني للانتظار بعد ان يشغل التكامل ضوءا كان مطفأ قبل اخذ snapshot. الافتراضي 3 ثوان للتعريض/التركيز.",
+          "run_without_printing": "اذا لم يتم تحديد حساس حالة طباعة، يعمل الكشف المجدول فقط عند تفعيل هذا الخيار. زر Test يشغل فحصا واحدا دائما.",
+          "detection_interval": "عدد الثواني بين الفحوصات المجدولة عندما تكون حالة الطباعة نشطة. امثلة: 600 لعشر دقائق، 900 لخمس عشرة دقيقة.",
+          "warning_threshold": "يستخدم عندما تكون الحساسية Custom thresholds.",
+          "failure_threshold": "يستخدم عندما تكون الحساسية Custom thresholds.",
+          "cooldown_seconds": "الافتراضي 900 ثانية. مع حساس حالة طباعة، ترسل الفحوصات المجدولة حدث detected واحدا لكل نافذة طباعة نشطة؛ وتستمر result events في الارسال مع كل فحص."
+        }
+      }
+    },
+    "error": {
+      "invalid_instance_id": "يجب ان تحتوي بادئة entity على حرف slug صالح واحد على الاقل.",
+      "instance_id_exists": "بادئة entity هذه مستخدمة بالفعل بواسطة كاشف اخر.",
+      "warning_above_failure": "يجب ان يكون حد التحذير اقل من حد الفشل او مساويا له.",
+      "already_configured": "هذه الكاميرا مكونة بالفعل.",
+      "camera_image_unavailable": "الكاميرا المحددة لا تعرض entity_picture URL. جرب كاميرا اخرى او اضبط snapshot URL مباشر.",
+      "ml_health_failed": "فشل فحص صحة خادم ML. تأكد ان المضيف قابل للوصول ويشير الى base URL مثل http://192.168.1.100:3333.",
+      "ml_auth_failed": "رفض خادم ML الرمز.",
+      "ml_image_fetch_failed": "تعذر على خادم ML جلب صورة الكاميرا او فك ترميزها. تحقق من Home Assistant Host ووصول الكاميرا من خادم ML."
+    },
+    "abort": {
+      "already_configured": "هذه الكاميرا مكونة بالفعل."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "اعدادات الكاشف",
+        "description": "حدث اعدادات الكاميرا وخادم ML وحالة الطباعة والكشف لهذا الكاشف.",
+        "data": {
+          "home_assistant_host": "Home Assistant Host",
+          "obico_host": "Obico ML API Host",
+          "obico_auth_token": "Obico ML API Auth Token",
+          "camera": "الكاميرا",
+          "snapshot_url": "رابط snapshot مباشر",
+          "print_status_sensor": "حساس حالة الطباعة",
+          "active_print_states": "حالات الطباعة النشطة",
+          "chamber_light": "ضوء الحجرة",
+          "light_control_mode": "التحكم بالضوء",
+          "light_settle_seconds": "تأخير استقرار الضوء",
+          "run_without_printing": "تشغيل الكشف المجدول بدون حالة طباعة",
+          "detection_interval": "فاصل الكشف",
+          "sensitivity": "الحساسية",
+          "warning_threshold": "حد التحذير",
+          "failure_threshold": "حد الفشل",
+          "cooldown_seconds": "فترة تهدئة حدث detected"
+        },
+        "data_description": {
+          "home_assistant_host": "URL يمكن لخادم ML الوصول اليه. عند تشغيل Docker على مضيف LAN اخر، استخدم HA LAN URL مثل http://192.168.1.90:8123.",
+          "obico_host": "Base URL لخادم ML الخاص بهذا المشروع، مثل http://192.168.1.100:3333. يقوم الاعداد بفحص /hc/ و /debug/image.",
+          "obico_auth_token": "يجب ان يطابق ML_API_TOKEN / obico_api_secret المكون على خادم ML.",
+          "camera": "اي HA camera entity. مثال من elegoo-homeassistant: camera.elegoo_centauri_carbon2_chamber_camera. قد يختلف اسم جهازك.",
+          "snapshot_url": "اختياري. اتركه فارغا لاستخدام صورة Home Assistant camera proxy للكاميرا المحددة.",
+          "print_status_sensor": "اختياري لكن موصى به. مثال: sensor.elegoo_centauri_carbon2_print_status. للاسماء بأسلوب Elegoo، يتم استخدام حساس current_status المطابق تلقائيا كحارس اضافي.",
+          "active_print_states": "حالات مفصولة بفواصل تعني الطباعة، مثل printing,printing_recovery.",
+          "chamber_light": "اختياري. مثال: light.elegoo_centauri_carbon2_chamber_light. يستخدم فقط بواسطة اعداد التحكم بالضوء.",
+          "light_control_mode": "اختر ما اذا كان الكشف لا يتحكم بالضوء، او يشغله ويبقيه مشغلا، او يعيد حالة الضوء السابقة بعد كل snapshot.",
+          "light_settle_seconds": "عدد الثواني للانتظار بعد ان يشغل التكامل ضوءا كان مطفأ قبل اخذ snapshot. الافتراضي 3 ثوان للتعريض/التركيز.",
+          "run_without_printing": "اذا لم يتم تحديد حساس حالة طباعة، يعمل الكشف المجدول فقط عند تفعيل هذا الخيار. زر Test يشغل فحصا واحدا دائما.",
+          "detection_interval": "عدد الثواني بين الفحوصات المجدولة عندما تكون حالة الطباعة نشطة. امثلة: 600 لعشر دقائق، 900 لخمس عشرة دقيقة.",
+          "warning_threshold": "يستخدم عندما تكون الحساسية Custom thresholds.",
+          "failure_threshold": "يستخدم عندما تكون الحساسية Custom thresholds.",
+          "cooldown_seconds": "الافتراضي 900 ثانية. مع حساس حالة طباعة، ترسل الفحوصات المجدولة حدث detected واحدا لكل نافذة طباعة نشطة؛ وتستمر result events في الارسال مع كل فحص."
+        }
+      }
+    },
+    "error": {
+      "warning_above_failure": "يجب ان يكون حد التحذير اقل من حد الفشل او مساويا له.",
+      "camera_image_unavailable": "الكاميرا المحددة لا تعرض entity_picture URL. جرب كاميرا اخرى او اضبط snapshot URL مباشر.",
+      "ml_health_failed": "فشل فحص صحة خادم ML. تأكد ان المضيف قابل للوصول ويشير الى base URL مثل http://192.168.1.100:3333.",
+      "ml_auth_failed": "رفض خادم ML الرمز.",
+      "ml_image_fetch_failed": "تعذر على خادم ML جلب صورة الكاميرا او فك ترميزها. تحقق من Home Assistant Host ووصول الكاميرا من خادم ML."
+    }
+  },
+  "services": {
+    "predict": {
+      "name": "توقع spaghetti من URL",
+      "description": "يشغل نموذج Obico ML على URL صورة خام",
+      "fields": {
+        "obico_host": {
+          "name": "Obico ML API Host",
+          "description": "Obico ML API host"
+        },
+        "obico_auth_token": {
+          "name": "Obico ML API Auth Token",
+          "description": "رمز مصادقة Obico ML API"
+        },
+        "image_url": {
+          "name": "Image URL",
+          "description": "Snapshot URL"
+        }
+      }
+    },
+    "run_detection": {
+      "name": "تشغيل الكشف",
+      "description": "يشغل فحص كشف واحدا لكاشف مكون.",
+      "fields": {
+        "detector": {
+          "name": "الكاشف"
+        },
+        "config_entry": {
+          "name": "Config entry"
+        },
+        "force": {
+          "name": "اجبار"
+        }
+      }
+    },
+    "reset_state": {
+      "name": "اعادة ضبط حالة الكشف",
+      "description": "يمسح confidence والنتيجة وحالة الخطأ للكاشف."
+    }
+  }
+}

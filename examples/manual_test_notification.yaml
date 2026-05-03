@@ -1,0 +1,25 @@
+alias: Elegoo Spaghetti - Manual Test Result Notification
+mode: single
+
+triggers:
+  - trigger: event
+    event_type: elegoo_spaghetti_detection_result
+    event_data:
+      detector: elegoo_spaghetti_detection
+      manual: true
+
+variables:
+  notify_service: notify.mobile_app_your_phone
+
+actions:
+  - action: "{{ notify_service }}"
+    data:
+      title: "Spaghetti detection test result"
+      message: >
+        Status: {{ trigger.event.data.status }}.
+        Confidence:
+        {{ (trigger.event.data.confidence | float(0) * 100) | round(1) }}%.
+        Detections: {{ trigger.event.data.detections }}.
+        Error: {{ trigger.event.data.last_error or 'none' }}.
+      data:
+        image: "{{ trigger.event.data.image_url }}"

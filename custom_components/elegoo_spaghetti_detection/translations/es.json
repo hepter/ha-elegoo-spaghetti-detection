@@ -1,0 +1,150 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Elegoo Spaghetti Detection",
+        "description": "Crea un detector para una camara de impresora Elegoo. La integracion solo detecta fallos y genera entidades/eventos; las acciones de pausar, detener y notificar quedan en tus automatizaciones.",
+        "data": {
+          "name": "Nombre del detector",
+          "instance_id": "Prefijo de entidad",
+          "home_assistant_host": "Host de Home Assistant",
+          "obico_host": "Host de la API ML de Obico",
+          "obico_auth_token": "Token de API ML de Obico",
+          "camera": "Camara",
+          "snapshot_url": "URL directa de captura",
+          "print_status_sensor": "Sensor de estado de impresion",
+          "active_print_states": "Estados activos de impresion",
+          "chamber_light": "Luz de camara",
+          "light_control_mode": "Control de luz",
+          "light_settle_seconds": "Espera de luz",
+          "run_without_printing": "Ejecutar deteccion programada sin estado de impresion",
+          "detection_interval": "Intervalo de deteccion",
+          "sensitivity": "Sensibilidad",
+          "warning_threshold": "Umbral de advertencia",
+          "failure_threshold": "Umbral de fallo",
+          "cooldown_seconds": "Enfriamiento del evento detectado"
+        },
+        "data_description": {
+          "home_assistant_host": "URL accesible por el servidor ML. Para Docker en otro host LAN, usa la URL LAN de HA, por ejemplo http://192.168.1.90:8123.",
+          "obico_host": "URL base del servidor ML de este proyecto, por ejemplo http://192.168.1.100:3333. La configuracion comprueba /hc/ y /debug/image.",
+          "obico_auth_token": "Debe coincidir con ML_API_TOKEN / obico_api_secret configurado en el servidor ML.",
+          "instance_id": "Slug estable usado en los ID de entidad. Usa un prefijo distinto para cada detector, por ejemplo elegoo_cc2_left.",
+          "camera": "Cualquier entidad de camara de HA. Ejemplo de elegoo-homeassistant: camera.elegoo_centauri_carbon2_chamber_camera. El nombre de tu dispositivo puede variar.",
+          "snapshot_url": "Opcional. Dejalo vacio para usar la imagen proxy de la camara seleccionada en Home Assistant. Usalo solo para camaras poco comunes.",
+          "print_status_sensor": "Opcional pero recomendado. Ejemplo: sensor.elegoo_centauri_carbon2_print_status. Para nombres estilo Elegoo, el sensor current_status coincidente se usa automaticamente como proteccion extra.",
+          "active_print_states": "Estados separados por comas que significan impresion, por ejemplo printing,printing_recovery. Elegoo CC2 normalmente usa printing.",
+          "chamber_light": "Opcional. Ejemplo: light.elegoo_centauri_carbon2_chamber_light. Solo lo usa el ajuste de control de luz.",
+          "light_control_mode": "Elige si la deteccion no controla la luz, la enciende y la deja encendida, o restaura el estado anterior despues de cada captura.",
+          "light_settle_seconds": "Segundos que se esperan despues de encender una luz apagada antes de tomar la captura. El valor predeterminado es 3 segundos para exposicion/enfoque.",
+          "run_without_printing": "Si no se selecciona sensor de estado, la deteccion programada solo se ejecuta cuando esto esta activado. El boton Test siempre ejecuta una comprobacion.",
+          "detection_interval": "Segundos entre comprobaciones programadas mientras el estado de impresion esta activo. Ejemplos: 600 para 10 minutos, 900 para 15 minutos.",
+          "warning_threshold": "Se usa cuando Sensibilidad esta en Custom thresholds.",
+          "failure_threshold": "Se usa cuando Sensibilidad esta en Custom thresholds.",
+          "cooldown_seconds": "El valor predeterminado es 900 segundos. Con sensor de estado, las comprobaciones programadas emiten un evento detected por ventana activa de impresion; los eventos result siguen emitiendose en cada comprobacion."
+        }
+      }
+    },
+    "error": {
+      "invalid_instance_id": "El prefijo de entidad debe contener al menos un caracter slug valido.",
+      "instance_id_exists": "Este prefijo de entidad ya lo usa otro detector.",
+      "warning_above_failure": "El umbral de advertencia debe ser menor o igual que el umbral de fallo.",
+      "already_configured": "Esta camara ya esta configurada.",
+      "camera_image_unavailable": "La camara seleccionada no expone una URL entity_picture. Prueba otra camara o define una URL directa de captura.",
+      "ml_health_failed": "La comprobacion de salud del servidor ML fallo. Confirma que el host sea accesible y apunte a la URL base, por ejemplo http://192.168.1.100:3333.",
+      "ml_auth_failed": "El servidor ML rechazo el token.",
+      "ml_image_fetch_failed": "El servidor ML no pudo obtener o decodificar la imagen de la camara. Revisa Home Assistant Host y el acceso a la camara desde el servidor ML."
+    },
+    "abort": {
+      "already_configured": "Esta camara ya esta configurada."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Ajustes del detector",
+        "description": "Actualiza la camara, servidor ML, estado de impresion y ajustes de deteccion para este detector.",
+        "data": {
+          "home_assistant_host": "Host de Home Assistant",
+          "obico_host": "Host de la API ML de Obico",
+          "obico_auth_token": "Token de API ML de Obico",
+          "camera": "Camara",
+          "snapshot_url": "URL directa de captura",
+          "print_status_sensor": "Sensor de estado de impresion",
+          "active_print_states": "Estados activos de impresion",
+          "chamber_light": "Luz de camara",
+          "light_control_mode": "Control de luz",
+          "light_settle_seconds": "Espera de luz",
+          "run_without_printing": "Ejecutar deteccion programada sin estado de impresion",
+          "detection_interval": "Intervalo de deteccion",
+          "sensitivity": "Sensibilidad",
+          "warning_threshold": "Umbral de advertencia",
+          "failure_threshold": "Umbral de fallo",
+          "cooldown_seconds": "Enfriamiento del evento detectado"
+        },
+        "data_description": {
+          "home_assistant_host": "URL accesible por el servidor ML. Para Docker en otro host LAN, usa la URL LAN de HA, por ejemplo http://192.168.1.90:8123.",
+          "obico_host": "URL base del servidor ML de este proyecto, por ejemplo http://192.168.1.100:3333. La configuracion comprueba /hc/ y /debug/image.",
+          "obico_auth_token": "Debe coincidir con ML_API_TOKEN / obico_api_secret configurado en el servidor ML.",
+          "camera": "Cualquier entidad de camara de HA. Ejemplo de elegoo-homeassistant: camera.elegoo_centauri_carbon2_chamber_camera. El nombre de tu dispositivo puede variar.",
+          "snapshot_url": "Opcional. Dejalo vacio para usar la imagen proxy de la camara seleccionada en Home Assistant.",
+          "print_status_sensor": "Opcional pero recomendado. Ejemplo: sensor.elegoo_centauri_carbon2_print_status. Para nombres estilo Elegoo, el sensor current_status coincidente se usa automaticamente como proteccion extra.",
+          "active_print_states": "Estados separados por comas que significan impresion, por ejemplo printing,printing_recovery.",
+          "chamber_light": "Opcional. Ejemplo: light.elegoo_centauri_carbon2_chamber_light. Solo lo usa el ajuste de control de luz.",
+          "light_control_mode": "Elige si la deteccion no controla la luz, la enciende y la deja encendida, o restaura el estado anterior despues de cada captura.",
+          "light_settle_seconds": "Segundos que se esperan despues de encender una luz apagada antes de tomar la captura. El valor predeterminado es 3 segundos para exposicion/enfoque.",
+          "run_without_printing": "Si no se selecciona sensor de estado, la deteccion programada solo se ejecuta cuando esto esta activado. El boton Test siempre ejecuta una comprobacion.",
+          "detection_interval": "Segundos entre comprobaciones programadas mientras el estado de impresion esta activo. Ejemplos: 600 para 10 minutos, 900 para 15 minutos.",
+          "warning_threshold": "Se usa cuando Sensibilidad esta en Custom thresholds.",
+          "failure_threshold": "Se usa cuando Sensibilidad esta en Custom thresholds.",
+          "cooldown_seconds": "El valor predeterminado es 900 segundos. Con sensor de estado, las comprobaciones programadas emiten un evento detected por ventana activa de impresion; los eventos result siguen emitiendose en cada comprobacion."
+        }
+      }
+    },
+    "error": {
+      "warning_above_failure": "El umbral de advertencia debe ser menor o igual que el umbral de fallo.",
+      "camera_image_unavailable": "La camara seleccionada no expone una URL entity_picture. Prueba otra camara o define una URL directa de captura.",
+      "ml_health_failed": "La comprobacion de salud del servidor ML fallo. Confirma que el host sea accesible y apunte a la URL base, por ejemplo http://192.168.1.100:3333.",
+      "ml_auth_failed": "El servidor ML rechazo el token.",
+      "ml_image_fetch_failed": "El servidor ML no pudo obtener o decodificar la imagen de la camara. Revisa Home Assistant Host y el acceso a la camara desde el servidor ML."
+    }
+  },
+  "services": {
+    "predict": {
+      "name": "Predecir spaghetti desde URL",
+      "description": "Ejecuta el modelo ML de Obico sobre una URL de imagen sin procesar",
+      "fields": {
+        "obico_host": {
+          "name": "Host de la API ML de Obico",
+          "description": "Host de la API ML de Obico"
+        },
+        "obico_auth_token": {
+          "name": "Token de API ML de Obico",
+          "description": "Token de autenticacion de la API ML de Obico"
+        },
+        "image_url": {
+          "name": "URL de imagen",
+          "description": "URL de captura"
+        }
+      }
+    },
+    "run_detection": {
+      "name": "Ejecutar deteccion",
+      "description": "Ejecuta una comprobacion de deteccion para un detector configurado.",
+      "fields": {
+        "detector": {
+          "name": "Detector"
+        },
+        "config_entry": {
+          "name": "Entrada de configuracion"
+        },
+        "force": {
+          "name": "Forzar"
+        }
+      }
+    },
+    "reset_state": {
+      "name": "Restablecer estado de deteccion",
+      "description": "Limpia la confianza, el resultado y el estado de error del detector."
+    }
+  }
+}

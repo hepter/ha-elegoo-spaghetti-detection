@@ -1,0 +1,17 @@
+#!/usr/bin/with-contenv bashio
+
+declare ML_API_TOKEN
+
+ML_API_TOKEN=$(bashio::config 'obico_api_secret')
+export ML_API_TOKEN
+export ML_USE_GPU=$(bashio::config 'use_gpu')
+export GUNICORN_TIMEOUT=$(bashio::config 'gunicorn_timeout')
+
+cd /app
+FLASK_APP=server.py venv/bin/gunicorn \
+  --bind "0.0.0.0:3333" \
+  --workers "${GUNICORN_WORKERS:-1}" \
+  --timeout "${GUNICORN_TIMEOUT:-120}" \
+  --error-logfile - \
+  --log-level info \
+  wsgi:application
