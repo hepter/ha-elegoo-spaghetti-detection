@@ -1,33 +1,54 @@
 # Elegoo Spaghetti Detection
 
-Home Assistant spaghetti/failure detection for Elegoo FDM printers. It is
-tested with Elegoo Centauri Carbon 2 through
-[`danielcherubini/elegoo-homeassistant`](https://github.com/danielcherubini/elegoo-homeassistant),
-but the detector can use any Home Assistant camera entity.
+Home Assistant spaghetti/failure detection with an Elegoo Centauri Carbon-first setup, designed around [`danielcherubini/elegoo-homeassistant`](https://github.com/danielcherubini/elegoo-homeassistant).
+Other printers or workflows can also be used when they expose a Home Assistant camera entity, optional light entity, and user-defined automations, but they are not the primary target.
 
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=hepter&repository=ha-elegoo-spaghetti-detection&category=integration)
 
-This project started as an Elegoo-focused adaptation of
-[`nberktumer/ha-bambu-lab-p1-spaghetti-detection`](https://github.com/nberktumer/ha-bambu-lab-p1-spaghetti-detection).
-The original project provided the Obico ML workflow and Home Assistant
-integration foundation.
+<p>
+  <img src="docs/images/camera-spaghetti-failure.png" alt="Camera frame with spaghetti failure" width="720">
+</p>
 
-This repository is not affiliated with Elegoo, Home Assistant, HACS, Obico, or
-the original upstream author.
+The integration turns camera snapshots into Home Assistant entities and events.
+Printer actions such as pause, stop, resume, and notifications stay in your own
+automations, so the same detector can be used with different printer setups.
 
-## Scope
+## Quick Start
 
-The integration detects possible print failures and exposes Home Assistant
-entities/events. It does not directly control the printer.
+1. Run the ML server. See [ML server and logs](docs/ml-server.md).
+2. Install the custom integration through HACS or manually. See
+   [Installation](docs/installation.md).
+3. Add `Elegoo Spaghetti Detection` from Home Assistant integrations.
+4. Select the camera and optional print status sensor. See
+   [Configuration](docs/configuration.md).
+5. Press `Test Spaghetti Detection`.
+6. Add one of the [automation examples](docs/automations.md).
+7. Add one of the [dashboard examples](docs/dashboard.md).
 
-Detection flow:
+## Documentation
+
+- [Installation](docs/installation.md)
+- [Configuration](docs/configuration.md)
+- [Automation examples](docs/automations.md)
+- [Dashboard examples](docs/dashboard.md)
+- [ML server and logs](docs/ml-server.md)
+- [Troubleshooting](docs/troubleshooting.md)
+- [HACS publishing notes](docs/HACS_PUBLISHING.md)
+
+## How It Works
 
 ```text
 camera snapshot -> ML server -> confidence/result sensors -> Home Assistant events
 ```
 
-Printer-specific actions such as pause, resume, stop, and notifications belong
-in user automations. Ready-to-edit examples are included.
+The integration detects possible print failures and exposes Home Assistant
+entities/events. It does not directly control the printer.
+
+When a print status sensor is configured, scheduled detection only runs during
+the configured active print states. Elegoo `print_status` sensors are also
+guarded by the companion `current_status` sensor when it exists, which avoids
+scheduled checks during homing or idle states where `print_status` can remain
+`printing`.
 
 ## Features
 
@@ -35,9 +56,6 @@ in user automations. Ready-to-edit examples are included.
 - Uses an Obico/TSD FDM failure model running in a local Docker/HA add-on server.
 - Validates ML server health and camera image reachability during setup.
 - Optional print status sensor gates scheduled detection to active print states.
-- Elegoo `print_status` sensors are guarded by the companion `current_status`
-  sensor when it exists, avoiding scheduled checks during homing/idle states
-  where `print_status` can remain `printing`.
 - Optional chamber light control can leave the light alone, turn it on and keep
   it on, or temporarily turn it on and restore the previous state after each
   snapshot.
@@ -51,45 +69,25 @@ in user automations. Ready-to-edit examples are included.
 - CPU-first ML startup by default to avoid CUDA timeout failures on systems
   without a working GPU runtime.
 
-## Documentation
-
-- [Installation](docs/installation.md)
-- [Configuration](docs/configuration.md)
-- [Automation examples](docs/automations.md)
-- [Dashboard examples](docs/dashboard.md)
-- [ML server and logs](docs/ml-server.md)
-- [Troubleshooting](docs/troubleshooting.md)
-- [HACS publishing notes](docs/HACS_PUBLISHING.md)
-
 ## Screenshots
 
 Integration setup:
 
-![Elegoo Spaghetti Detection setup form](docs/images/config-flow-add-hub.png)
+<p>
+  <img src="docs/images/config-flow-add-hub.png" alt="Elegoo Spaghetti Detection setup form" width="720">
+</p>
 
 Enhanced dashboard in idle state:
 
-![Enhanced dashboard idle state](docs/images/dashboard-hacs-waiting-for-print.png)
+<p>
+  <img src="docs/images/dashboard-hacs-waiting-for-print.png" alt="Enhanced dashboard idle state" width="720">
+</p>
 
 Enhanced dashboard after a detected failure:
 
-![Enhanced dashboard detected failure](docs/images/dashboard-hacs-detected.png)
-
-Camera frame with an obvious spaghetti failure:
-
-![Camera frame with spaghetti failure](docs/images/camera-spaghetti-failure.png)
-
-## Quick Start
-
-1. Run the ML server. See [ML server and logs](docs/ml-server.md).
-2. Install the custom integration through HACS or manually. See
-   [Installation](docs/installation.md).
-3. Add `Elegoo Spaghetti Detection` from Home Assistant integrations.
-4. Select the camera and optional print status sensor. See
-   [Configuration](docs/configuration.md).
-5. Press `Test Spaghetti Detection`.
-6. Add one of the [automation examples](docs/automations.md).
-7. Add one of the [dashboard examples](docs/dashboard.md).
+<p>
+  <img src="docs/images/dashboard-hacs-detected.png" alt="Enhanced dashboard detected failure" width="720">
+</p>
 
 ## Typical Elegoo CC2 Entities
 
@@ -154,3 +152,10 @@ status
 ```
 
 Use these fields in notifications and advanced automations.
+
+## Credits
+
+This project started as an Elegoo-focused adaptation of
+[`nberktumer/ha-bambu-lab-p1-spaghetti-detection`](https://github.com/nberktumer/ha-bambu-lab-p1-spaghetti-detection).
+The original project provided the Obico ML workflow and Home Assistant
+integration foundation.
