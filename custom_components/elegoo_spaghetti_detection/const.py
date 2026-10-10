@@ -5,7 +5,12 @@ from homeassistant.const import Platform
 DOMAIN = "elegoo_spaghetti_detection"
 BRAND = "Elegoo Spaghetti Detection"
 
-PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.BUTTON]
+PLATFORMS = [
+    Platform.BINARY_SENSOR,
+    Platform.SENSOR,
+    Platform.BUTTON,
+    Platform.SWITCH,
+]
 
 CONF_INSTANCE_ID = "instance_id"
 CONF_HOME_ASSISTANT_HOST = "home_assistant_host"

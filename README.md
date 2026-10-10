@@ -60,6 +60,9 @@ scheduled checks during homing or idle states where `print_status` can remain
   it on, or temporarily turn it on and restore the previous state after each
   snapshot.
 - Manual `Test Spaghetti Detection` button.
+- `switch.<prefix>_detection_enabled` pauses and resumes scheduled detection
+  without removing the integration, useful to silence false positives during a
+  print. Manual actions keep working while paused.
 - Confidence, raw score, detection count, status, last run, next run, and last
   error sensors.
 - `binary_sensor.<prefix>_spaghetti_detected`.

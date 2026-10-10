@@ -342,11 +342,26 @@ class SpaghettiDetectorRuntime:
         self.detected_event_sent_for_active_period = False
         self._notify_listeners()
 
+    def set_enabled(self, enabled: bool) -> None:
+        """Enable or pause scheduled detection."""
+        if self.enabled == enabled:
+            return
+        self.enabled = enabled
+        if not self.running:
+            if not enabled:
+                self.status = "paused"
+            elif self.status == "paused":
+                self.status = "idle"
+        self._notify_listeners()
+
     async def async_run_detection(self, *, manual: bool) -> dict[str, Any]:
         """Run one detection request."""
         if self.running:
             self.status = "busy"
             self._notify_listeners()
+            return self._service_result()
+
+        if not manual and not self.enabled:
             return self._service_result()
 
         if not manual and not self._should_run_scheduled():

@@ -118,7 +118,13 @@ sensor.elegoo_spaghetti_detection_last_run
 sensor.elegoo_spaghetti_detection_next_run
 button.elegoo_spaghetti_detection_test_spaghetti_detection
 button.elegoo_spaghetti_detection_reset_detection_state
+switch.elegoo_spaghetti_detection_detection_enabled
 ```
 
 Press `Test Spaghetti Detection` to run one check immediately from the current
 camera image, even if the printer is not printing.
+
+Turn `Scheduled detection` off to pause the scheduled checks: the detector stays
+configured but takes no snapshots and sends no ML requests. Turn it back on to
+resume. The `Test Spaghetti Detection` button and the `run_detection` service
+(with `force`) keep working while paused.

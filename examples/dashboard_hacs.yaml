@@ -60,6 +60,12 @@ cards:
               bg: 'rgba(142,142,147,.14)',
               desc: 'Waiting for an active print.'
             },
+            paused: {
+              label: 'Paused',
+              color: '#8e8e93',
+              bg: 'rgba(142,142,147,.14)',
+              desc: 'Scheduled detection is paused. Turn Scheduled detection back on to resume.'
+            },
             status_unavailable: {
               label: 'Print status unavailable',
               color: '#ff9f0a',
@@ -388,6 +394,40 @@ cards:
             }
 
       - type: custom:mushroom-template-card
+        entity: switch.elegoo_spaghetti_detection_detection_enabled
+        primary: Scheduled detection
+        secondary: >-
+          {% if is_state('switch.elegoo_spaghetti_detection_detection_enabled', 'on') %}
+            Active: analyzes snapshots while printing
+          {% else %}
+            Paused: no snapshots or ML requests
+          {% endif %}
+        icon: >-
+          {% if is_state('switch.elegoo_spaghetti_detection_detection_enabled', 'on') %}
+            mdi:motion-play-outline
+          {% else %}
+            mdi:motion-pause-outline
+          {% endif %}
+        icon_color: >-
+          {% if is_state('switch.elegoo_spaghetti_detection_detection_enabled', 'on') %}
+            green
+          {% else %}
+            amber
+          {% endif %}
+        layout: vertical
+        tap_action:
+          action: toggle
+        hold_action:
+          action: more-info
+        card_mod:
+          style: |
+            ha-card {
+              border-radius: 18px;
+              background: rgba(255,255,255,.045);
+              border: 1px solid rgba(255,255,255,.08);
+            }
+
+      - type: custom:mushroom-template-card
         entity: button.elegoo_spaghetti_detection_test_spaghetti_detection
         primary: Manual test
         secondary: Take one snapshot and run detection
@@ -469,6 +509,8 @@ cards:
     entities:
       - entity: sensor.elegoo_spaghetti_detection_status
         name: Status
+      - entity: switch.elegoo_spaghetti_detection_detection_enabled
+        name: Scheduled detection
       - entity: sensor.elegoo_spaghetti_detection_next_run
         name: Next scheduled check
       - entity: binary_sensor.elegoo_spaghetti_detection_spaghetti_detected
